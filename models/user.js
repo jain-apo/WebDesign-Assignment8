@@ -8,22 +8,32 @@ const UserSchema = mongoose.Schema({
     required: [true, "fullName is required"],
     unique: [true, "fullName already exists in the database"],
     validate: [
-      (element) => validator.isAlpha(element, "en-US", { ignore: " " }),
+      (name) => validator.isAlpha(name, "en-US", { ignore: " " }),
       "Usernames must be alphanumeric",
     ],
-    minLength: [1, "Password should be at least four characters"],
   },
   email: {
     type: String,
-    require: [true, "Enter an email address."],
-    unique: [true, "That email address is taken."],
+    require: [true, "email address is required."],
+    unique: [true, "That email address is already taken."],
     lowercase: true,
-    validate: [validator.isEmail, "Enter a valid email address."],
+    validate: [validator.isEmail, "a valid email is required."],
   },
   password: {
     type: String,
-    required: [true, "Enter a password."],
-    minLength: [4, "Password should be at least four characters"],
+    required: [true, "password is required."],
+    validate: [
+      (pass) => {
+        let min = pass.length >= 8;
+        let upper = /[A-Z]/.test(pass);
+        let lower = /[a-z]/.test(pass);
+        let special = /[#?!@$%^&*-]/.test(pass);
+        let number = /[0-9]/.test(pass);
+
+        return min && lower && upper && special && number;
+      },
+      "Password must have minimum eight characters, at least one uppercase letter, one lowercase letter and one number",
+    ],
   },
   created: {
     type: Date,

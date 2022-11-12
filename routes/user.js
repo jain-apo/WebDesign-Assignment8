@@ -84,6 +84,42 @@ userRouter.post("/create", async (req, res, next) => {
   }
 });
 
+userRouter.put("/edit", async (req, res, next) => {
+  try {
+    const { fullName, email, password } = req.body;
+
+    if (!email) {
+      return res.status(401).json({ error: "email id is required" });
+    }
+
+    if (!fullName && !password) {
+      return res
+        .status(401)
+        .json({ error: "either fullName or password is required" });
+    }
+
+    let user = await User.findOne({ email }).exec();
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ error: "User with email " + email + " not found." });
+    }
+
+    if (fullName) {
+      user.fullName = fullName;
+    }
+
+    if (password) {
+      user.password = password;
+    }
+
+    res.status(201).json(userView(await user.save()));
+  } catch (err) {
+    next(err);
+  }
+});
+
 userRouter.delete("/delete", async (req, res, next) => {
   try {
     const { email } = req.body;
